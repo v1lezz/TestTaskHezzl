@@ -1,0 +1,5 @@
+services:
+  postgres_db:
+  redis:
+  clickhouse:
+  nats:

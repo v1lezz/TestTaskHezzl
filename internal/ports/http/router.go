@@ -7,9 +7,9 @@ import (
 )
 
 func AppRouter(ctx context.Context, a *app.App) {
-	http.HandleFunc("/good/create", nil)
-	http.HandleFunc("/good/update", nil)
-	http.HandleFunc("/good/remove", nil)
-	http.HandleFunc("/goods/list", nil)
-	http.HandleFunc("/goods/reprioritiize", nil)
+	http.HandleFunc("/good/create", CreateGoodHandler(ctx, a))
+	http.HandleFunc("/good/update", UpdateGoodHandler(ctx, a))
+	http.HandleFunc("/good/remove", RemoveGoodHandler(ctx, a))
+	http.HandleFunc("/goods/list", GetListGoodsHandler(ctx, a))
+	http.HandleFunc("/goods/reprioritiize", ReprioritiizeGoodHandler(ctx, a))
 }
