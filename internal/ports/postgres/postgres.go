@@ -9,16 +9,16 @@ import (
 	"testTaskHezzl/internal/config"
 	"testTaskHezzl/internal/good"
 	"testTaskHezzl/internal/meta"
-	"testTaskHezzl/migrations"
+	migrations_postgresql "testTaskHezzl/migrations/postgresql"
 )
 
 const ( //sql-requests
-	getListGoodsWithLimitAndOffset = "SELECT * FROM good LIMIT $1 OFFSET $2"
-	insertGood                     = "INSERT INTO good(project_id, name, priority, removed, created_at) VALUES ($1, $2, COALESCE((SELECT MAX(priority) FROM good) + 1, 1) , false, NOW()) RETURNING *"
-	checkGOOD                      = "SELECT * FROM good WHERE id = $1"
-	updateGood                     = "UPDATE goods SET name = $1, description = $2 WHERE id = $3 AND project_id $4 RETURNING *"
-	removeGood                     = "UPDATE good SET removed = true WHERE id = $1 RETURNING *"
-	getListGoodsFromID             = "SELECT * FROM good WHERE id >= $1"
+	getListGoodsWithLimitAndOffset = "SELECT id, project_id, name, COALESCE(description, ''), priority, removed, created_at FROM good LIMIT $1 OFFSET $2"
+	insertGood                     = "INSERT INTO good(project_id, name, priority, removed, created_at) VALUES ($1, $2, COALESCE((SELECT MAX(priority) FROM good) + 1, 1) , false, NOW()) RETURNING id, project_id, name, '', priority, removed, created_at"
+	checkGOOD                      = "SELECT id, project_id, name, COALESCE(description, ''), priority, removed, created_at FROM good WHERE id = $1"
+	updateGood                     = "UPDATE good SET name = $1, description = $2 WHERE id = $3 AND project_id $4 RETURNING *"
+	removeGood                     = "UPDATE good SET removed = true WHERE id = $1 RETURNING id, project_id, name, COALESCE(description, ''), priority, removed, created_at"
+	getListGoodsFromID             = "SELECT id, project_id, name, COALESCE(description, ''), priority, removed, created_at FROM good WHERE id >= $1"
 )
 
 var (
@@ -38,7 +38,7 @@ func NewConnection(ctx context.Context, cfg config.DBConfig, migrationsPath stri
 	if err != nil {
 		return nil, err
 	}
-	if err = migrations.Up(conn, migrationsPath); err != nil {
+	if err = migrations_postgresql.Up(conn, migrationsPath); err != nil {
 		return nil, err
 	}
 	return &PostgresConn{

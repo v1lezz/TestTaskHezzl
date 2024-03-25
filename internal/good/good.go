@@ -7,13 +7,13 @@ import (
 )
 
 type Good struct {
-	ID          int
-	ProjectID   int
-	Name        string
-	Description string
-	Priority    int
-	Removed     bool
-	CreatedAt   time.Time
+	ID          int       `json:"id"`
+	ProjectID   int       `json:"projectId"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Priority    int       `json:"priority"`
+	Removed     bool      `json:"removed"`
+	CreatedAt   time.Time `json:"createdAt"`
 }
 
 type DBRepository interface {
@@ -26,7 +26,8 @@ type DBRepository interface {
 }
 
 type CacheRepository interface {
-	SaveOnKey(ctx context.Context, g Good) error
-	GetOnKeyWithLimitAndOffset(ctx context.Context, limit, offset int) (meta.Meta, []Good, error)
-	GetOnId(ctx context.Context, id int) (Good, error)
+	SaveOnKey(context.Context, Good) error
+	GetOnKeyWithLimitAndOffset(context.Context, int, int) (meta.Meta, []Good, error)
+	GetOnId(context.Context, int) (Good, error)
+	GoodIsExist(context.Context, int) (bool, error)
 }

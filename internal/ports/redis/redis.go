@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"strconv"
@@ -17,7 +18,7 @@ type RedisConn struct {
 
 func NewRedisConn(ctx context.Context) *RedisConn {
 	client := redis.NewClient(&redis.Options{
-		Addr:     ":6379",
+		Addr:     "cache_redis:6379",
 		Password: "",
 		DB:       0,
 	})
@@ -74,4 +75,15 @@ func (rc *RedisConn) GetOnId(ctx context.Context, id int) (good.Good, error) {
 		return good.Good{}, fmt.Errorf("error unmarshal getted good from cache: %w", err)
 	}
 	return g, nil
+}
+
+func (rc *RedisConn) GoodIsExist(ctx context.Context, id int) (bool, error) {
+	_, err := rc.GetOnId(ctx, id)
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }

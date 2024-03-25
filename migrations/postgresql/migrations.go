@@ -1,4 +1,4 @@
-package migrations
+package migrations_postgresql
 
 import (
 	"github.com/jackc/pgx/v5/pgxpool"

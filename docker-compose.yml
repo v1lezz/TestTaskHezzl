@@ -1,5 +1,91 @@
+version: '3.7'
 services:
-  postgres_db:
+  postgres:
+    image: postgres:latest
+    user: postgres
+    restart: always
+    container_name: pg_db
+    networks:
+      - good_net
+    environment:
+      - POSTGRES_USER=v1lezz
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=goods
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
   redis:
+    image: redis:latest
+    restart: always
+    container_name: cache_redis
+    ports:
+      - "6379:6379"
+    command:  redis-server --save 60 10 --loglevel warning
+    environment:
+      - REDIS_PASSWORD=1234
+      - REDIS_PORT=6379
+      - REDIS_DATABASES=1
+    networks:
+      - good_net
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
   clickhouse:
+    image: clickhouse/clickhouse-server
+    container_name: ch
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - good_clickhouse:/var/lib/clickhouse
+    networks:
+      - good_net
+    environment:
+      - CLICKHOUSE_DB=db_log
+      - CLICKHOUSE_USER=v1lezz
+      - CLICKHOUSE_PASSWORD=1234
   nats:
+    image: nats
+    container_name: nats
+    ports:
+      - "8222:8222"
+      - "4222:4222"
+    command: "--cluster_name NATS --cluster nats://0.0.0.0:6222 --http_port 8222"
+    networks:
+      - good_net
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    restart: always
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./.env
+    networks:
+      - good_net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+networks:
+  good_net:
+    driver: bridge
+
+volumes:
+  good_db:
+    name: good_db
+  good_redis:
+    name: good_redis
+  good_clickhouse:
+    name: good_clickhouse

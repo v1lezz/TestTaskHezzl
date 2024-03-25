@@ -11,7 +11,7 @@ type DBConfig struct {
 }
 
 func (cfg DBConfig) String() string {
-	return fmt.Sprintf("")
+	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s", cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Database)
 }
 
 type Config struct {
